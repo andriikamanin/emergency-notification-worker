@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 
+
 @Service
 @RequiredArgsConstructor
 public class TwilioNotificationService {
@@ -23,35 +24,47 @@ public class TwilioNotificationService {
         Twilio.init(twilioConfig.getAccountSid(), twilioConfig.getAuthToken());
     }
 
-    public String sendSms(String phoneNumber, String message) {
+    public String sendSms(String phoneNumber, String message, String id, String latitude, String longitude, String userId, String status) {
+        // Формируем текст сообщения с дополнительной информацией
+        String formattedMessage = String.format(
+                "ID: %s\nСообщение: %s\nКоординаты: Широта - %s, Долгота - %s\nПользователь: %s\nСтатус: %s",
+                id, message, latitude, longitude, userId, status
+        );
+
         try {
             Message sms = Message.creator(
                     new PhoneNumber(phoneNumber),
                     new PhoneNumber(twilioConfig.getPhoneNumber()),
-                    message
+                    formattedMessage
             ).create();
 
-            logger.info("SMS sent successfully. SID: {}", sms.getSid());
-            return "SMS sent successfully";
+            logger.info("SMS отправлено успешно. SID: {}", sms.getSid());
+            return "SMS отправлено успешно";
         } catch (Exception e) {
-            logger.error("Failed to send SMS", e);
-            return "Error: " + e.getMessage();
+            logger.error("Не удалось отправить SMS", e);
+            return "Ошибка: " + e.getMessage();
         }
     }
 
-    public String sendWhatsAppMessage(String phoneNumber, String message) {
+    public String sendWhatsAppMessage(String phoneNumber, String message, String id, String latitude, String longitude, String userId, String status) {
+        // Формируем текст сообщения с дополнительной информацией
+        String formattedMessage = String.format(
+                "ID: %s\nСообщение: %s\nКоординаты: Широта - %s, Долгота - %s\nПользователь: %s\nСтатус: %s",
+                id, message, latitude, longitude, userId, status
+        );
+
         try {
             Message whatsappMessage = Message.creator(
                     new PhoneNumber("whatsapp:" + phoneNumber),
                     new PhoneNumber("whatsapp:" + twilioConfig.getPhoneNumber()),
-                    message
+                    formattedMessage
             ).create();
 
-            logger.info("WhatsApp message sent successfully. SID: {}", whatsappMessage.getSid());
-            return "WhatsApp message sent successfully";
+            logger.info("WhatsApp сообщение отправлено успешно. SID: {}", whatsappMessage.getSid());
+            return "WhatsApp сообщение отправлено успешно";
         } catch (Exception e) {
-            logger.error("Failed to send WhatsApp message", e);
-            return "Error: " + e.getMessage();
+            logger.error("Не удалось отправить WhatsApp сообщение", e);
+            return "Ошибка: " + e.getMessage();
         }
     }
 }
